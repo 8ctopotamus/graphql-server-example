@@ -3,16 +3,21 @@ const { ApolloServer, gql } = require('apollo-server')
 const typeDefs = gql`
   type Book {
     title: String!,
-    author: Author
+    author: String
   }
 
   type Author {
     name: String!,
-    books: [Book!]!
+    books: [Book]
   }
 
   type Query {
-    books: [Book]
+    books: [Book],
+    authors: [Author]
+  }
+
+  type Mutation {
+    addBook(title: String, author: String): Book
   }
 `
 
@@ -27,9 +32,29 @@ const books = [
   },
 ];
 
+const authors = [
+  {
+    name: 'Kate Chopin',
+    books: [ books[0] ]
+  },
+  {
+    name: 'Paul Auster',
+    books: [ books[1] ]
+  }
+]
+
 const resolvers = {
   Query: {
-    books: () => books
+    books: () => books,
+    authors: () => authors
+  },
+  Mutation: {
+    addBook: (parent, { author, title }) => {
+      const newBook = { author, title }
+      books.push(newBook)
+      authors.push({ name: author, books: [newBook] })
+      return newBook
+    } 
   }
 }
 
